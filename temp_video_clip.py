@@ -1,13 +1,12 @@
+
 """
 Create a temporary video for analysis.
 """
 
+# Standard library imports
 import os
-import os.path
 import time
-from glob import glob
 import datetime
-import cv2
 
 # -----------------------------------------------------------------------------
 
@@ -20,35 +19,36 @@ def get_timestamp(input_name):
     return new_creation
 
 def make_command(input_file, output_file, start, duration):
-    command = f'ffmpeg -ss {int(start)} -i "{input_file}" '
+    if start>0:
+        command = f'ffmpeg -ss {int(start)} -i "{input_file}" '
+    else:
+        command = f'ffmpeg -i "{input_file}" '
     command += f'-t {int(duration)} -c copy '
     command += f'"{output_file}"'
     return command
 
+def make_clip(input_name, output_dir, start, duration):
+    files = []
+    
+    output_video = input_name.split('\\')[-1].replace('.mp4', '_short.mp4')
+    output_name = output_dir+output_video
+    files.append(output_name)
+    
+    command = make_command(input_dir+input_video, output_name, start, duration)
+    
+    os.system(command)
+    stinfo = os.stat(input_name)
+    os.utime(output_name,(stinfo.st_atime, stinfo.st_mtime))
+    
 # -----------------------------------------------------------------------------
 
 input_dir = ""
 input_video = ""
+input_name = input_dir + input_video
 
 output_dir = ""
 
 start = 330    #seconds
 duration = 120    #seconds
 
-files = []
-
-input_name = input_dir + input_video
-output_video = input_name.split('\\')[-1].replace('.mp4', '_short.mp4')
-output_name = output_dir+output_video
-files.append(output_name)
-
-command = make_command(input_dir+input_video, output_name, start, duration)
-print(command)
-
-os.system(command)
-stinfo = os.stat(input_name)
-os.utime(output_name,(stinfo.st_atime, stinfo.st_mtime))
-
-time.sleep(5)
-for f in files:
-    os.remove(f)
+make_clip(input_name, output_dir, start, duration)
