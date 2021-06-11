@@ -6,6 +6,8 @@ Create a temporary video for analysis.
 import os
 import time
 import datetime
+import pickle
+import pywintypes, win32file, win32con
 
 # -----------------------------------------------------------------------------
 
@@ -24,22 +26,46 @@ def make_command(input_file, output_file, start, duration):
         command = f'ffmpeg -ss {int(start)} -i "{input_file}" '
     else:
         command = f'ffmpeg -i "{input_file}" '
-    command += (f'-t {int(duration)} -map_metadata 0 -c copy '
+    command += (f'-t {int(duration)} -map_metadata 0 '
+                '-c copy '
                 f'"{output_file}" ')
     print(command)
     return command
 
 def generate_filename(input_path, output_dir):
-    output_video = input_path.split('/')[-1].replace('.mp4', '_short.mp4')
+    if input_path.count('.')>=2:
+        raise Exception('Filename has multiple full stops')
+    output_video = input_path.split('/')[-1].replace('.', '_test.')
     output_path = output_dir+output_video
     return output_path
 
-def make_clip(output_path, start, duration):
-    command = make_command(input_dir+input_video, output_path, start, duration)
+def make_clip(input_path, output_path, start, duration):
+    command = make_command(input_path, output_path, start, duration)
     os.system(command)
-    stinfo = os.stat(input_path)
-    os.utime(output_path,(stinfo.st_atime, stinfo.st_mtime))
     
+def reset_file_ctime(input_path, output_path):
+    """
+    Keep the original creation time of the file, but set the modified time to
+    current date.
+    """
+    ctime = os.path.getctime(input_path)
+    mtime = os.path.getmtime(input_path)
+    new_time = min(ctime, mtime)
+    orig_time = os.path.getmtime(output_path)
+    wintime1 = pywintypes.Time(new_time)
+    winfile = win32file.CreateFile(output_path, win32con.GENERIC_WRITE,
+                                   win32con.FILE_SHARE_READ | 
+                                   win32con.FILE_SHARE_WRITE | 
+                                   win32con.FILE_SHARE_DELETE,
+                                   None, 
+                                   win32con.OPEN_EXISTING,
+                                   win32con.FILE_ATTRIBUTE_NORMAL, 
+                                   None)
+
+    win32file.SetFileTime(      winfile,  wintime1,  wintime1,     wintime1)
+    winfile.close()
+    os.utime(output_path, (orig_time, orig_time))
+
 # -----------------------------------------------------------------------------
 
 """
@@ -47,16 +73,19 @@ Only run as a command line program.
 """
 
 if __name__ == "__main__":
-    input_dir = ""
-    input_video = ""
+    input_dir = "E:/....."
+    input_video = "P1050158.MP4"
     input_path = input_dir + input_video
-    output_dir = ""
+    work_dir = "U:/....."
+    filepaths = {}
     
-    start = 330    #seconds
+    start = 0    #seconds
     duration = 120    #seconds
     
-    files = []
+    output_path = generate_filename(input_path, work_dir)
+    filepaths['original'] = output_path
+    make_clip(input_path, output_path, start, duration)
+    reset_file_ctime(input_path, output_path)
     
-    output_path = generate_filename(input_path, output_dir)
-    files.append(output_path)
-    make_clip(output_path, start, duration)
+    pickle.dump(filepaths, open(work_dir+"filepaths.pkl", "wb" ))
+    
