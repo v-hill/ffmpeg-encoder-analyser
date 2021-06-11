@@ -27,13 +27,14 @@ def make_command(input_file, output_file, start, duration):
     command += f'"{output_file}"'
     return command
 
-def make_clip(input_name, output_dir, start, duration):
-    files = []
-    
+def generate_filename(input_name, output_dir):
     output_video = input_name.split('\\')[-1].replace('.mp4', '_short.mp4')
     output_name = output_dir+output_video
-    files.append(output_name)
+    return output_name
+
     
+def make_clip(output_name, start, duration):
+
     command = make_command(input_dir+input_video, output_name, start, duration)
     
     os.system(command)
@@ -42,13 +43,21 @@ def make_clip(input_name, output_dir, start, duration):
     
 # -----------------------------------------------------------------------------
 
-input_dir = ""
-input_video = ""
-input_name = input_dir + input_video
+"""
+Only run as a command line program.
+"""
 
-output_dir = ""
-
-start = 330    #seconds
-duration = 120    #seconds
-
-make_clip(input_name, output_dir, start, duration)
+if __name__ == "__main__":
+    input_dir = ""
+    input_video = ""
+    input_name = input_dir + input_video
+    output_dir = ""
+    
+    start = 330    #seconds
+    duration = 120    #seconds
+    
+    files = []
+    
+    output_name = generate_filename(input_name, output_dir)
+    files.append(output_name)
+    make_clip(output_name, start, duration)
