@@ -23,9 +23,9 @@ def make_command(input_file, output_file, start, duration):
     input_file = os.path.normpath(input_file)
     output_file = os.path.normpath(output_file)
     if start>0:
-        command = f'ffmpeg -ss {int(start)} -i "{input_file}" '
+        command = f'ffmpeg -hide_banner -ss {int(start)} -i "{input_file}" '
     else:
-        command = f'ffmpeg -i "{input_file}" '
+        command = f'ffmpeg -hide_banner -i "{input_file}" '
     command += (f'-t {int(duration)} -map_metadata 0 '
                 '-c copy '
                 f'"{output_file}" ')
@@ -74,7 +74,7 @@ Only run as a command line program.
 
 if __name__ == "__main__":
     input_dir = "E:/....."
-    input_video = "P1050158.MP4"
+    input_video = ""
     input_path = input_dir + input_video
     work_dir = "U:/....."
     filepaths = {}
