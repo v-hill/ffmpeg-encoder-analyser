@@ -29,8 +29,10 @@ def generate_filename(input_path, output_dir, bitrate, encoder):
     return output_path
 
 def make_command(input_file, output_path, encoder, bitrate):
-    command = (f'ffmpeg -i "{os.path.normpath(input_file)}" '
-               f'-c:v {encoder} -b:v {int(bitrate)}k '
+    command = (f'ffmpeg -hide_banner -i "{os.path.normpath(input_file)}" '
+               # f'-c:v {encoder} -cpu-used 3 -b:v {int(bitrate)}k '
+               f'-c:v {encoder} -rc vbr -b:v {int(bitrate)}k '# libsvtav1
+               # f'-c:v {encoder} -b:v {int(bitrate)}k '
                '-c:a aac -map_metadata 0 '
                f'"{os.path.normpath(output_path)}" ')
     return command
@@ -50,25 +52,26 @@ def np_round_signif(x, p):
 
 # -----------------------------------------------------------------------------
 
-work_dir = "U:/....."
-filepaths = pickle.load(open(work_dir+"filepaths.pkl", "rb" ))
-input_path = filepaths['original']
-
-stats_json = get_stats_ffprobe(input_path)
-stats_video_stream = stats_json['streams'][0]
-
-bitrate_orig = round(float(stats_video_stream["bit_rate"])/1000,2)
-print(f'original bitrate: {bitrate_orig} kbit/s')
-bitrate_tests = np.linspace(bitrate_orig/2,bitrate_orig,6)
-bitrate_tests = np.arange(10000,100001,10000)
-bitrate_tests = np_round_signif(bitrate_tests, 3) # Round to 3 sig fig
-
-
-encoder = 'hevc_nvenc'
-for bitrate in bitrate_tests:
-    output_path = generate_filename(input_path, work_dir, bitrate, encoder)
-    filepaths[bitrate] = output_path
-    command = make_command(input_path, output_path, encoder, bitrate)
-    os.system(command)
-
-pickle.dump(filepaths, open(work_dir+"filepaths.pkl", "wb" ))
+if __name__ == "__main__":
+    work_dir = "U:/....."
+    filepaths = pickle.load(open(work_dir+"filepaths.pkl", "rb" ))
+    input_path = filepaths['original']
+    
+    stats_json = get_stats_ffprobe(input_path)
+    stats_video_stream = stats_json['streams'][0]
+    
+    bitrate_orig = round(float(stats_video_stream["bit_rate"])/1000,2)
+    print(f'original bitrate: {bitrate_orig} kbit/s')
+    bitrate_tests = np.linspace(bitrate_orig/2,bitrate_orig,6)
+    bitrate_tests = np.arange(10000,100001,10000)
+    bitrate_tests = np_round_signif(bitrate_tests, 3) # Round to 3 sig fig
+    
+    encoder = 'libx265'
+    for bitrate in bitrate_tests:
+        output_path = generate_filename(input_path, work_dir, bitrate, encoder)
+        filepaths[bitrate] = output_path
+        command = make_command(input_path, output_path, encoder, bitrate)
+        print(command)
+        os.system(command)
+    
+    pickle.dump(filepaths, open(work_dir+"filepaths.pkl", "wb" ))
