@@ -22,6 +22,25 @@ codecs_h265 = {'libx265' : 'libx265 H.265 / HEVC (codec hevc)',
 # -----------------------------------------------------------------------------
 
 def generate_filename(input_path, output_dir, bitrate, encoder):
+    """
+    Create a new filename based on the original video file and test bitrate.
+
+    Parameters
+    ----------
+    input_path : str
+        Full path of input video.
+    output_dir : str
+        Directory of output video.
+    bitrate : int
+        Video bitrate in kbit/s.
+    encoder : str
+        Encoder for ffmpeg to use.
+
+    Returns
+    -------
+    output_path : str
+        Full path of new output video.
+    """
     if input_path.count('.')>=2:
         raise Exception('Filename has multiple full stops')
     output_video = input_path.split('/')[-1].replace('.',  f'_{encoder}_{int(bitrate)}.')
