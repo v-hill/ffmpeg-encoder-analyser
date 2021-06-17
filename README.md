@@ -1,5 +1,7 @@
-# h265-encoder
+# ffmpeg-encoder-analyser
 
-Repository for tests of re-encoding video as H.265 (HEVC) format.
+Repository for comparing the efficiency of FFmpeg encoders. 
 
-<img src="./project_plan.png" alt="drawing" width="360"/>
+The outline of this project is shown in the diagram below.
+
+<img src="./project_diagram.png" alt="drawing" width="250"/>
