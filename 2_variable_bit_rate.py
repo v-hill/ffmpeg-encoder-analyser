@@ -132,17 +132,18 @@ if __name__ == "__main__":
     
     bitrate_orig = round(float(stats_video_stream["bit_rate"])/1000, 2)
     print(f'original bitrate: {bitrate_orig} kbit/s')
-    bitrate_tests = np.linspace(bitrate_orig/2, bitrate_orig, 6)
+    
+    # Set custom bitrate options here
+    bitrate_tests = np.linspace(bitrate_orig/2, bitrate_orig, 6) 
     bitrate_tests = np.arange(10000, 100001, 10000)
     bitrate_tests = np_round_signif(bitrate_tests, 3) # Round to 3 sig fig
     
-    encoder = 'libx265'
+    encoder = 'libx265' # Specifiy the FFmpeg encoder
     for bitrate in bitrate_tests:
         output_path = generate_filename(input_path, work_dir, bitrate, encoder)
         filepaths[bitrate] = output_path
         command = make_command(input_path, output_path, encoder, bitrate)
         print(command)
         os.system(command)
-    
     pickle.dump(filepaths, open(work_dir+"filepaths.pkl", "wb"))
     
