@@ -5,7 +5,9 @@ Create a temporary video for analysis.
 # Standard library imports
 import os
 import pickle
-import pywintypes, win32file, win32con
+import pywintypes
+import win32file
+import win32con
 
 # ---------------------------- Function definitions ---------------------------
 
@@ -40,6 +42,7 @@ def make_command(in_path, out_path, duration, start=0):
     print(command)
     return command
 
+
 def generate_filename(in_path, output_dir):
     """
     Create the filename of the new test video clip.
@@ -59,8 +62,9 @@ def generate_filename(in_path, output_dir):
     if in_path.count('.') >= 2:
         raise Exception('Filename has multiple full stops')
     output_video = in_path.split('/')[-1].replace('.', '_test.')
-    out_path = output_dir+output_video
+    out_path = output_dir + output_video
     return out_path
+
 
 def make_clip(in_path, out_path, duration, start=0):
     """
@@ -79,7 +83,8 @@ def make_clip(in_path, out_path, duration, start=0):
     """
     command = make_command(in_path, out_path, duration, start=start)
     os.system(command)
-    
+
+
 def reset_file_ctime(in_path, out_path):
     """
     Keep the original creation time of the file, but set the modified time to
@@ -98,12 +103,12 @@ def reset_file_ctime(in_path, out_path):
     orig_time = os.path.getmtime(out_path)
     wintime1 = pywintypes.Time(new_time)
     winfile = win32file.CreateFile(out_path, win32con.GENERIC_WRITE,
-                                   win32con.FILE_SHARE_READ | 
-                                   win32con.FILE_SHARE_WRITE | 
+                                   win32con.FILE_SHARE_READ |
+                                   win32con.FILE_SHARE_WRITE |
                                    win32con.FILE_SHARE_DELETE,
-                                   None, 
+                                   None,
                                    win32con.OPEN_EXISTING,
-                                   win32con.FILE_ATTRIBUTE_NORMAL, 
+                                   win32con.FILE_ATTRIBUTE_NORMAL,
                                    None)
 
     win32file.SetFileTime(winfile, wintime1, wintime1, wintime1)
@@ -113,19 +118,18 @@ def reset_file_ctime(in_path, out_path):
 # ------------------------------------ Main -----------------------------------
 
 if __name__ == "__main__":
-    input_dir = "E:/....."
-    input_video = ""
-    input_path = input_dir + input_video
-    work_dir = "U:/....."
+    INPUT_DIR = "E:/....."
+    INPUT_VIDEO = "E:/....."
+    INPUT_PATH = INPUT_DIR + INPUT_VIDEO
+    WORK_DIR = "E:/....."
     filepaths = {}
-    
-    clip_start = 0    #seconds
-    clip_length = 30    #seconds
-    
-    output_path = generate_filename(input_path, work_dir)
+
+    clip_start = 0  # seconds
+    clip_length = 30  # seconds
+
+    output_path = generate_filename(INPUT_PATH, WORK_DIR)
     filepaths['original'] = output_path
-    make_clip(input_path, output_path, clip_length, start=clip_start)
-    reset_file_ctime(input_path, output_path)
-    
-    pickle.dump(filepaths, open(work_dir+"filepaths.pkl", "wb"))
-    
+    make_clip(INPUT_PATH, output_path, clip_length, start=clip_start)
+    reset_file_ctime(INPUT_PATH, output_path)
+
+    pickle.dump(filepaths, open(WORK_DIR + "filepaths.pkl", "wb"))
